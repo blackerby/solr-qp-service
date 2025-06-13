@@ -24,6 +24,6 @@ $ curl -X 'POST' \
   }'
 
 {'query': {'bool': {'must': [{'lucene': {'query': 'hello'}},
-                             {'surround': '3w(world, wonder)'}],
+                             {'surround': {'query': '3w(world, wonder)'}}],
                     'should': [{'lucene': {'query': 'silly'}}]}}}
 ```

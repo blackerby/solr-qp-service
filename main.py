@@ -61,7 +61,7 @@ class TreeToJson(Transformer):
                 inner.append(branch.value)
         inner = ", ".join(inner)
         q = f"{distance}{distop}({inner})"
-        return {"surround": q}
+        return {"surround": {"query": q}}
 
 
 parser = Lark(grammar, start="query", parser="lalr", transformer=TreeToJson())
