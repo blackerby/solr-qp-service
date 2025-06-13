@@ -1,4 +1,4 @@
-from lark import Lark, Transformer
+from lark import Lark, Transformer, Tree
 from fastapi import FastAPI
 from pydantic import BaseModel
 
@@ -10,9 +10,9 @@ grammar = r"""
 
     lucene : WORD
     bool : (should | must)+
-    should : "~" (lucene | bool)
-    must : "+" (lucene | bool)
-    surround : distance distop "(" query ", " query ")"
+    should : "~" (lucene | bool | surround)
+    must : "+" (lucene | bool | surround)
+    surround : distance distop "(" WORD ", " WORD ")"
     distance : INT 
     distop : within | near
     within : "w" | "W"
@@ -45,13 +45,26 @@ class TreeToJson(Transformer):
         q = tree[0].value
         return {"lucene": {"query": q}}
 
-    # def surround(self, tree):
-    #     for branch in tree:
-    #         print(branch)
-    #     return {"surround": tree}
+    def surround(self, tree):
+        inner = []
+        for branch in tree:
+            if isinstance(branch, Tree):
+                if branch.data == "distance":
+                    distance = branch.children[0].value
+                if branch.data == "distop":
+                    leaf = branch.children[0].data
+                    if leaf == "within":
+                        distop = "w"
+                    else:
+                        distop = "n"
+            else:
+                inner.append(branch.value)
+        inner = ", ".join(inner)
+        q = f"{distance}{distop}({inner})"
+        return {"surround": q}
 
 
-parser = Lark(grammar, start="query")
+parser = Lark(grammar, start="query", parser="lalr", transformer=TreeToJson())
 
 app = FastAPI()
 
