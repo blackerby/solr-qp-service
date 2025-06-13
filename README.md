@@ -9,6 +9,10 @@ The script in main.py uses Lark to create a parser based on a grammar of a custo
 ## Example
 
 ```bash
+$ fastapi dev main.py
+```
+
+```bash
 $ curl -X 'POST' \
         'http://localhost:8000/parse/' \
         -H 'accept: application/json' \
